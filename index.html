@@ -14,13 +14,13 @@
         }
         .background {
             position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
             transform: rotate(45deg);
-            font-size: 16px;
-            line-height: 1;
+            font-size: 120px;
+            line-height: 1.2;
             color: rgba(0, 0, 0, 0.1);
             overflow: hidden;
             z-index: 0;
@@ -33,6 +33,11 @@
             left: 0;
             right: 0;
             bottom: 0;
+            animation: scroll 60s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateY(-33.33%); }
+            100% { transform: translateY(0); }
         }
         .content {
             position: fixed;
@@ -50,9 +55,22 @@
         .title {
             font-size: 84px;
             font-weight: bold;
-            color: #000;
             margin-left: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: #000;
+            transition: color 0.3s ease;
+        }
+        .title.gradient-animate {
+            color: transparent;
+            background-image: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background-size: 300% 100%;
+            animation: gradientMove 5s ease infinite;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         .switch {
             position: relative;
@@ -60,38 +78,75 @@
             width: 70px;
             height: 40px;
         }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: #ccc;
             transition: .4s;
             border-radius: 40px;
+            overflow: hidden;
         }
         .slider:before {
             position: absolute;
             content: "";
-            height: 32px;
-            width: 32px;
-            left: 4px;
-            bottom: 4px;
+            height: 32px; width: 32px;
+            left: 4px; bottom: 4px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
+            z-index: 2;
         }
-        input:checked + .slider {
-            background-color: #2196F3;
+        input:checked + .slider { background-color: #f57c00; }
+        input:checked + .slider:before { transform: translateX(30px); }
+        .fire, .outer-fire {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 100%;
+            transform: scale(0);
+            transition: .4s;
         }
-        input:checked + .slider:before {
-            transform: translateX(30px);
+        input:checked + .slider .fire,
+        input:checked ~ .outer-fire { transform: scale(1); }
+        .fire span, .outer-fire span {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #ff9800;
+            border-radius: 50%;
+        }
+        .fire span:nth-child(1), .outer-fire span:nth-child(1) {
+            animation: fireAnim 1.5s ease-in-out infinite;
+        }
+        .fire span:nth-child(2), .outer-fire span:nth-child(2) {
+            animation: fireAnim 1.5s ease-in-out infinite .25s;
+        }
+        .fire span:nth-child(3), .outer-fire span:nth-child(3) {
+            animation: fireAnim 1.5s ease-in-out infinite .5s;
+        }
+        @keyframes fireAnim {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.2); }
+        }
+        .outer-fire {
+            z-index: -1;
+            transform: scale(0);
+            transition: .4s;
+            filter: blur(10px);
+        }
+        .outer-fire span {
+            background-color: #ff5722;
+        }
+        @keyframes colorChange {
+            0% { color: red; }
+            33% { color: blue; }
+            66% { color: green; }
+            100% { color: red; }
+        }
+        @keyframes scaleText {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
     </style>
 </head>
@@ -101,22 +156,35 @@
     </div>
     <div class="content">
         <label class="switch">
-            <input type="checkbox">
-            <span class="slider"></span>
+            <input type="checkbox" id="fireToggle">
+            <span class="slider">
+                <div class="fire">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </span>
         </label>
-        <div class="title">SUPERMODE</div>
+        <div class="outer-fire">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="title" id="mainTitle">SUPERMODE</div>
     </div>
 
     <script>
         const background = document.getElementById('background');
+        const fireToggle = document.getElementById('fireToggle');
+        const mainTitle = document.getElementById('mainTitle');
         const text = 'SUPERMODE ';
         
         function fillBackground() {
-            const diagonalLength = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight);
+            const diagonalLength = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight) * 3;
             const textWidth = getTextWidth(text);
-            const repeatsPerLine = Math.ceil(diagonalLength / textWidth) + 1;
-            const lineHeight = parseInt(getComputedStyle(background).fontSize);
-            const lines = Math.ceil(diagonalLength / lineHeight) + 1;
+            const repeatsPerLine = Math.ceil(diagonalLength / textWidth);
+            const lineHeight = parseInt(getComputedStyle(background).fontSize) * 1.2;
+            const lines = Math.ceil(diagonalLength / lineHeight);
             
             let content = '';
             for (let i = 0; i < lines; i++) {
@@ -132,6 +200,16 @@
             context.font = getComputedStyle(background).font;
             return context.measureText(text).width;
         }
+
+        fireToggle.addEventListener('change', function() {
+            if (this.checked) {
+                background.style.animation = 'scroll 60s linear infinite, colorChange 5s linear infinite, scaleText 3s ease-in-out infinite';
+                mainTitle.classList.add('gradient-animate');
+            } else {
+                background.style.animation = 'scroll 60s linear infinite';
+                mainTitle.classList.remove('gradient-animate');
+            }
+        });
 
         window.addEventListener('resize', fillBackground);
         fillBackground();
