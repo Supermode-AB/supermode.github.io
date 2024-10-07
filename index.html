@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUPERMODE</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .background {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            transform: rotate(45deg);
+            font-size: 16px;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .background-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            font-size: 84px;
+            font-weight: bold;
+            color: #000;
+            margin-left: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 70px;
+            height: 40px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 40px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 32px;
+            width: 32px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="background-content" id="background"></div>
+    </div>
+    <div class="content">
+        <label class="switch">
+            <input type="checkbox">
+            <span class="slider"></span>
+        </label>
+        <div class="title">SUPERMODE</div>
+    </div>
+
+    <script>
+        const background = document.getElementById('background');
+        const text = 'SUPERMODE ';
+        
+        function fillBackground() {
+            const diagonalLength = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight);
+            const textWidth = getTextWidth(text);
+            const repeatsPerLine = Math.ceil(diagonalLength / textWidth) + 1;
+            const lineHeight = parseInt(getComputedStyle(background).fontSize);
+            const lines = Math.ceil(diagonalLength / lineHeight) + 1;
+            
+            let content = '';
+            for (let i = 0; i < lines; i++) {
+                content += text.repeat(repeatsPerLine) + '\n';
+            }
+            
+            background.innerText = content;
+        }
+
+        function getTextWidth(text) {
+            const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+            const context = canvas.getContext("2d");
+            context.font = getComputedStyle(background).font;
+            return context.measureText(text).width;
+        }
+
+        window.addEventListener('resize', fillBackground);
+        fillBackground();
+    </script>
+</body>
+</html>
